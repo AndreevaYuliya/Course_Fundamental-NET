@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34714.143
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoginForm", "LoginForm\LoginForm.csproj", "{60FBCD15-FE9B-445F-9483-EB824C58FD9E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoginFormTests", "LoginFormTests\LoginFormTests.csproj", "{7E9EF179-DC35-4C78-9A10-4EFA241FFE18}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{60FBCD15-FE9B-445F-9483-EB824C58FD9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60FBCD15-FE9B-445F-9483-EB824C58FD9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60FBCD15-FE9B-445F-9483-EB824C58FD9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60FBCD15-FE9B-445F-9483-EB824C58FD9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E9EF179-DC35-4C78-9A10-4EFA241FFE18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E9EF179-DC35-4C78-9A10-4EFA241FFE18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E9EF179-DC35-4C78-9A10-4EFA241FFE18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E9EF179-DC35-4C78-9A10-4EFA241FFE18}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AE992B68-7661-477E-9B69-A4FD357E64A6}
+	EndGlobalSection
+EndGlobal
