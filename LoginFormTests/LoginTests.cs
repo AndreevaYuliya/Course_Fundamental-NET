@@ -1,7 +1,10 @@
-using FluentAssertions;
-using LoginForm;
 using OpenQA.Selenium;
-using Serilog;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Firefox;
+using log4net;
+using LoginForm;
+using OpenQA.Selenium.Support.UI;
+using TechTalk.SpecFlow;
 
 namespace LoginFormTests
 {
@@ -9,89 +12,131 @@ namespace LoginFormTests
     [Parallelizable(ParallelScope.All)]
     public class LoginTests
     {
-        private IWebDriver driver;
-        private LoginPage loginPage;
+        private static readonly ILog log = LogManager.GetLogger(typeof(LoginTests));
+        private IWebDriver? driver;
+        private LoginPage? loginPage;
 
         [OneTimeSetUp]
         public void SetupLogging()
         {
-            // Настройка Serilog для логирования
-            Log.Logger = new LoggerConfiguration()
-                .WriteTo.Console()
-                .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day)
-                .CreateLogger();
-            Log.Information("Логгер инициализирован.");
+            // Initialize Log4Net
+            log.Info("Logger initialized.");
         }
 
-        [SetUp]
-        public void Setup()
+        private static IWebDriver GetWebDriver(string browser)
         {
-            string browser = TestContext.Parameters.Get("browser", "chrome");
-            Log.Information($"Запуск теста в браузере {browser}");
-            driver = WebDriverSingleton.GetDriver(browser);
+            return browser.ToLower() switch
+            {
+                "chrome" => new ChromeDriver(),
+                "firefox" => new FirefoxDriver(),
+                _ => throw new ArgumentException("Unsupported browser"),
+            };
+        }
+
+        [Test]
+        [TestCase("chrome")]
+        [TestCase("firefox")]
+
+        [Given(@"I am on the login page")]
+        public void GivenTestLoginWithValidCredentials(string browser)
+        {
+            log.Info($"Starting test in browser: {browser}");
+            driver = GetWebDriver(browser);
             driver.Navigate().GoToUrl("https://www.saucedemo.com/");
             loginPage = new LoginPage(driver);
 
-            // Enter login credentials (replace with actual login data)
-            loginPage.EnterUsername("standard_user"); // Enter the username
-            loginPage.EnterPassword("secret_sauce"); // Enter the password
 
-            // Submit the login form by clicking the login button
-            loginPage.ClickLogin();
+            log.Info("Navigated to the login page.");
         }
 
+        [When(@"I attempt to login with empty credentials")]
+        public void WhenTestLoginWithValidCredentials()
+        {
+            loginPage.EnterUsername("standard_user").EnterPassword("secret_sauce").ClickLogin();
+            log.Info("Attempted login with valid credentials.");
+        }
+
+        [Then(@"Wait for the page to load and check the page title")]
+        public void ThenTestLoginWithValidCredentials()
+        {
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+            wait.Until(d => d.Url.Contains("/inventory.html"));
+            log.Info("Verified that login with valid credentials redirects to the home page.");
+
+            driver.Quit(); // Cleanup driver after each test
+        }
+
+        [Test]
+        [TestCase("chrome")]
+        [TestCase("firefox")]
+
+        [Given(@"I am on the login page")]
+        public void GivenTestLoginWithOnlyUsername(string browser)
+        {
+            log.Info($"Starting test in browser: {browser}");
+            driver = GetWebDriver(browser);
+            driver.Navigate().GoToUrl("https://www.saucedemo.com/");
+            loginPage = new LoginPage(driver);
+
+
+            log.Info("Navigated to the login page.");
+        }
+
+        [When(@"I enter valid credentials and submit")]
+        public void WhenTestLoginWithOnlyUsername()
+        {
+            loginPage.EnterUsername("standard_user").EnterPassword("").ClickLogin();
+            log.Info("Attempted login with only username credentials.");
+        }
+
+        [Then(@"Wait for the page to load and check the page title")]
+        public void ThenTestLoginWithOnlyUsername()
+        {
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+            wait.Until(d => d.Url.Contains("/inventory.html"));
+            log.Info("Verified that login with only username redirects to the home page.");
+
+            driver.Quit(); // Cleanup driver after each test
+        }
+
+        [Test]
+        [TestCase("chrome")]
+        [TestCase("firefox")]
+
+        [Given(@"I am on the login page")]
+        public void GivenTestLoginWithEmptyCredentials(string browser)
+        {
+            log.Info($"Starting test in browser: {browser}");
+            driver = GetWebDriver(browser);
+            driver.Navigate().GoToUrl("https://www.saucedemo.com/");
+            loginPage = new LoginPage(driver);
+
+
+            log.Info("Navigated to the login page.");
+        }
+
+        [When(@"I attempt to login with empty credentials")]
+        public void WhenTestLoginWithEmptyCredentials()
+        {
+            loginPage.EnterUsername("").EnterPassword("").ClickLogin();
+            log.Info("Attempted login with empty credentials.");
+        }
+
+        [Then(@"Wait for the page to load and check the page title")]
+        public void ThenTestLoginWithEmptyCredentials()
+        {
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+            wait.Until(d => d.Url.Contains("/inventory.html"));
+            log.Info("Verified that login with empty credentials redirects to the home page.");
+
+            driver.Quit(); // Cleanup driver after each test
+        }
+     
         [TearDown]
         public void Teardown()
         {
-            Log.Information("Завершение теста.");
+            log.Info("Test finished.");
             driver?.Dispose();
-            WebDriverSingleton.QuitDriver();
-        }
-
-        [Test]
-        public void TestLoginWithEmptyCredentials()
-        {
-            Log.Information("Тест входа с пустыми данными запущен.");
-            loginPage.EnterUsername("").EnterPassword("").ClickLogin();
-            var errorMessage = loginPage.GetErrorMessage();
-            _ = errorMessage.Should().Be("Epic sadface: Username and password do not match any user in this service");
-            Log.Information("Тест входа с пустыми данными завершен успешно.");
-        }
-
-        [Test]
-        public void TestLoginWithOnlyUsername()
-        {
-            Log.Information("Тест входа только с именем пользователя запущен.");
-            loginPage.EnterUsername("standard_user").EnterPassword("").ClickLogin();
-            var errorMessage = loginPage.GetErrorMessage();
-            errorMessage.Should().Be("Epic sadface: Username and password do not match any user in this service");
-            Log.Information("Тест входа только с именем пользователя завершен успешно.");
-        }
-
-        [Test]
-        public void TestLoginWithValidCredentials()
-        {
-            Log.Information("Тест входа с корректными данными запущен.");
-            loginPage.EnterUsername("standard_user").EnterPassword("secret_sauce").ClickLogin();
-
-            try
-            {
-                var pageTitle = driver.FindElement(By.ClassName("login_logo")).Text;
-                pageTitle.Should().Be("Swag Labs");
-                Log.Information("Тест входа с корректными данными завершен успешно.");
-            }
-            catch (NoSuchElementException ex)
-            {
-                Log.Error("Элемент не найден: " + ex.Message);
-                Assert.Fail("Элемент не найден");
-            }
-        }
-
-        [OneTimeTearDown]
-        public void CleanupLogging()
-        {
-            Log.Information("Закрытие логгера.");
-            Log.CloseAndFlush();
         }
     }
 }

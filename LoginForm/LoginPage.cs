@@ -6,48 +6,58 @@ using OpenQA.Selenium.Support.UI;
 
 namespace LoginForm
 {
-    // Singleton-класс для управления WebDriver
-    public static class WebDriverSingleton
+    public static class UserCredentialsFactory
     {
-        private static IWebDriver? driver;
-        private static readonly object _lock = new object();    
+        private static readonly List<string> AcceptedUsernames = new List<string>
+    {
+        "standard_user",
+        "locked_out_user",
+        "problem_user",
+        "performance_glitch_user",
+        "error_user",
+        "visual_user"
+    };
 
-        public static IWebDriver GetDriver(string browser)
+        public static IEnumerable<string> GetUsernames()
         {
-            if (driver == null)
+            foreach (var username in AcceptedUsernames)
             {
-                lock (_lock)
-                {
-                    if (driver == null)
-                    {
-                        // Параметризация браузера
-                        driver = browser.ToLower() switch
-                        {
-                            "firefox" => new FirefoxDriver(),
-                            "chrome" => new ChromeDriver(),
-                            _ => throw new ArgumentException("Unsupported browser")
-                        };
-                        driver.Manage().Window.Maximize();
-                    }
-                }
+                yield return username;
             }
-            return driver;
+        }
+    }
+    public class LoginPageBuilder
+    {
+        private IWebDriver _driver;
+        private string _username;
+        private readonly string _password = "secret_sauce"; // Constant password
+
+        public LoginPageBuilder SetDriver(IWebDriver driver)
+        {
+            _driver = driver;
+            return this;
         }
 
-        public static void QuitDriver()
+        public LoginPageBuilder SetUsername(string username)
         {
-            driver?.Quit();
-            driver = null;
+            _username = username;
+            return this;
+        }
+
+        public LoginPage Build()
+        {
+            var loginPage = new LoginPage(_driver);
+            loginPage.EnterUsername(_username);
+            loginPage.EnterPassword(_password);
+            return loginPage;
         }
     }
 
-    // Page Object для страницы входа
     public class LoginPage(IWebDriver driver)
     {
         private IWebElement UsernameField => driver.FindElement(By.Id("user-name"));
         private IWebElement PasswordField => driver.FindElement(By.Id("password"));
         private IWebElement LoginButton => driver.FindElement(By.Id("login-button"));
-        private IWebElement ErrorMessage => driver.FindElement(By.CssSelector("[data-test='error']"));
 
         public LoginPage EnterUsername(string username)
         {
@@ -72,6 +82,51 @@ namespace LoginForm
             loginButton.Click();
         }
 
-        public string GetErrorMessage() => ErrorMessage.Text;
+        public string GetErrorMessage()
+        {
+            try
+            {
+                return driver.FindElement(By.XPath("//h3[@data-test='error']")).Text;
+            }
+            catch (NoSuchElementException)
+            {
+                return string.Empty;
+            }
+        }
+    }
+
+    public static class WebDriverSingleton
+    {
+        private static IWebDriver? _driver;
+
+        private static readonly object _lock = new object();
+
+        public static IWebDriver GetDriver(string browser)
+        {
+            if (_driver == null)
+            {
+                lock (_lock)
+                {
+                    if (_driver == null)
+                    {
+                        // Параметризация браузера
+                        _driver = browser.ToLower() switch
+                        {
+                            "firefox" => new FirefoxDriver(),
+                            "chrome" => new ChromeDriver(),
+                            _ => throw new ArgumentException("Unsupported browser")
+                        };
+                        _driver.Manage().Window.Maximize();
+                    }
+                }
+            }
+            return _driver;
+        }
+
+        public static void QuitDriver()
+        {
+            _driver?.Quit();
+            _driver = null;
+        }
     }
 }

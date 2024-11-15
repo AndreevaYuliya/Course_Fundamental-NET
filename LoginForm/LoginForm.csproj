@@ -8,11 +8,14 @@
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="6.12.2" />
+    <PackageReference Include="log4net" Version="3.0.3" />
     <PackageReference Include="Ocelot" Version="23.3.6" />
     <PackageReference Include="Selenium.Support" Version="4.26.1" />
     <PackageReference Include="Selenium.WebDriver" Version="4.26.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="SpecFlow" Version="3.9.74" />
+    <PackageReference Include="SpecFlow.NUnit" Version="3.9.74" />
   </ItemGroup>
 
 </Project>
