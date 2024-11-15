@@ -1,15 +1,16 @@
-﻿Feature: Login
+﻿Feature: Login functionality
 
-  Scenario Outline: User Login with various usernames
+  Scenario: Login with valid credentials
     Given I am on the login page
-    When I login with username "<username>" and password "secret_sauce"
-    Then I should see the appropriate result for username "<username>"
+    When I attempt to login with valid credentials
+    Then Wait for the page to load and check the page title
 
-    Examples:
-      | username               |
-      | standard_user          |
-      | locked_out_user        |
-      | problem_user           |
-      | performance_glitch_user|
-      | error_user             |
-      | visual_user            |
+  Scenario: Login with only username
+    Given I am on the login page
+    When I attempt to login with only username
+    Then Check for error message or correct page
+
+  Scenario: Login with empty credentials
+    Given I am on the login page
+    When I attempt to login with empty credentials
+    Then Check for error message or correct page after empty credentials
